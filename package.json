@@ -1,0 +1,30 @@
+{
+  "name": "redis-messenger",
+  "version": "0.1.0",
+  "description": "Distributed messaging via Redis",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "redis",
+    "message",
+    "broker"
+  ],
+  "author": "Dan-Matei Mitreanu",
+  "license": "MIT",
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.3"
+  },
+  "dependencies": {
+    "ioredis": "^5.3.2"
+  }
+}
