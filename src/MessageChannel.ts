@@ -94,6 +94,7 @@ class MessageChannel implements IMessageChannel {
         try {
             return await promise;
         } finally {
+            clearTimeout(rejectTimeout);
             this.responsePromises.delete(requestId);
         }
     }
