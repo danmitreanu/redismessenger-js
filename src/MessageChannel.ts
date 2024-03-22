@@ -16,7 +16,7 @@ interface IRequest {
 interface IResponse {
     replyTo: string;
     success: boolean;
-    errorString: string | undefined;
+    errorMessage: string | null | undefined;
     payload: any;
 }
 
@@ -35,8 +35,8 @@ class MessageChannel implements IMessageChannel {
 
     private responsePromises: Map<string, IPromiseResolver> = new Map<string, IPromiseResolver>();
 
-    constructor(internal: PubSubHandler, channelPrefix: string, channelName: string, clientName: string, defaultTimeout: number) {
-        this.pubsub = internal;
+    constructor(pubsubHandler: PubSubHandler, channelPrefix: string, channelName: string, clientName: string, defaultTimeout: number) {
+        this.pubsub = pubsubHandler;
         this.channelPrefix = channelPrefix;
         this.channelName = channelName;
         this.clientName = clientName;
@@ -51,7 +51,7 @@ class MessageChannel implements IMessageChannel {
             payload: message
         };
 
-        const redisChannel = RedisMessenger.createRequestChannelName(this.channelPrefix, this.channelName, this.clientName);
+        const redisChannel = RedisMessenger.createRequestChannelName(this.channelPrefix, this.channelName);
         await this.pubsub.publish(redisChannel, request);
     }
 
@@ -86,7 +86,7 @@ class MessageChannel implements IMessageChannel {
 
         this.responsePromises.set(requestId, resolver);
 
-        const redisChannel = RedisMessenger.createRequestChannelName(this.channelPrefix, this.channelName, this.clientName);
+        const redisChannel = RedisMessenger.createRequestChannelName(this.channelPrefix, this.channelName);
         await this.pubsub.publish(redisChannel, request);
 
         rejectTimeout = setTimeout(() => promiseReject(new Error("Query timed out")), this.defaultTimeout);
@@ -111,7 +111,7 @@ class MessageChannel implements IMessageChannel {
                 return;
 
             if (!response.success) {
-                resolver.reject(new Error(response.errorString));
+                resolver.reject(new Error(response.errorMessage || 'An error occured in the message handler'));
                 return;
             }
 
@@ -123,5 +123,8 @@ class MessageChannel implements IMessageChannel {
 }
 
 export {
-    IMessageChannel
+    IMessageChannel,
+    MessageChannel,
+    IRequest,
+    IResponse
 }
