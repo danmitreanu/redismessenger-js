@@ -22,11 +22,17 @@ const app = express();
 
 app.get('/', async (req, res) => {
     const message = req.query['message'];
-    const response = await dotnetChannel.query({
-        message
-    });
 
-    res.send(JSON.stringify(response));
+    try {
+        const response = await dotnetChannel.query({
+            message
+        });
+        res.send(JSON.stringify(response));
+    }
+    catch (err)
+    {
+        res.send({ error: err.message });
+    }
 });
 
 app.listen(8080, () => {
