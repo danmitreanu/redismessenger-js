@@ -1,6 +1,6 @@
 {
-  "name": "redis-messenger",
-  "version": "0.1.0",
+  "name": "redismessenger-js",
+  "version": "0.1.1",
   "description": "Distributed messaging via Redis",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
