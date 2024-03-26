@@ -15,18 +15,20 @@
   "keywords": [
     "redis",
     "message",
-    "broker"
+    "broker",
+    "redismessenger"
   ],
   "author": "Dan-Matei Mitreanu",
   "license": "MIT",
-  "devDependencies": {
-    "@types/uuid": "^9.0.8",
-    "ts-node": "^10.9.2",
-    "tsup": "^8.0.2",
-    "typescript": "^5.4.3"
-  },
   "dependencies": {
     "ioredis": "^5.3.2",
     "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.8",
+    "express": "^4.19.2",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.3"
   }
 }

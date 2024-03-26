@@ -5,22 +5,13 @@ import { IMessageChannel, IRequest, IResponse, MessageChannel } from './MessageC
 class RedisMessengerConfiguration {
     clientName: any;
     channelPrefix: any;
-    defaultTimeoutMs: number= 5000;
+    defaultTimeoutMs: number = 5000;
     redisOptions: RedisOptions = {};
-
-    /** @internal */
-    channelHandlers: Map<string, (payload: any) => any> = new Map<string, (payload: any) => any>();
-
-    addHandler(channelName: string, handler: (req: any) => Promise<any>) {
-        if (this.channelHandlers.has(channelName))
-            throw new Error(`A message handler with the name ${channelName} has already been registered`);
-
-        this.channelHandlers.set(channelName, handler);
-    }
 }
 
 interface IRedisMessenger {
     getMessageChannel: (channelName: string) => IMessageChannel;
+    addHandler: (channelName: string, handler: (payload: any) => any) => Promise<void>;
 }
 
 class RedisMessenger implements IRedisMessenger {
@@ -28,7 +19,7 @@ class RedisMessenger implements IRedisMessenger {
     private subClient: Redis;
     private clientName: string;
     private channelPrefix: string = '';
-    private defaultTimeoutMs: number;
+    private defaultTimeoutMs: number = 5000;
     private pubsubHandler: PubSubHandler;
 
     constructor(config: RedisMessengerConfiguration)
@@ -40,25 +31,19 @@ class RedisMessenger implements IRedisMessenger {
         if (config.channelPrefix)
             this.channelPrefix = `${config.channelPrefix}_`;
 
-        this.defaultTimeoutMs = config.defaultTimeoutMs;
+        if (config.defaultTimeoutMs)
+            this.defaultTimeoutMs = config.defaultTimeoutMs;
 
         this.pubsubHandler = new PubSubHandler(this.pubClient, this.subClient);
-        this.bindHandlers(config.channelHandlers);
     }
 
     getMessageChannel(channelName: string): IMessageChannel {
         return new MessageChannel(this.pubsubHandler, this.channelPrefix, channelName, this.clientName, this.defaultTimeoutMs);
     }
 
-    private async bindHandlers(handlers: Map<string, (payload: any) => any>) {
-        for (const channelName in handlers) {
-            const handler = handlers.get(channelName);
-            if (!handler)
-                continue;
-
-            const redisRequestChannel = RedisMessenger.createRequestChannelName(this.channelPrefix, channelName);
-            await this.pubsubHandler.subscribe(redisRequestChannel, this.createMessageHandlerWrapper(channelName, handler));
-        }
+    async addHandler(channelName: string, handler: (payload: any) => any) {
+        const redisRequestChannel = RedisMessenger.createRequestChannelName(this.channelPrefix, channelName);
+        await this.pubsubHandler.subscribe(redisRequestChannel, this.createMessageHandlerWrapper(channelName, handler));
     }
 
     private createMessageHandlerWrapper(channelName: string, handler: (payload: any) => any): (message: object) => Promise<void> {
